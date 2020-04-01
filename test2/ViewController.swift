@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     
     let captureSession = AVCaptureSession()
     var previewLayer:CALayer!
@@ -78,9 +78,38 @@ class ViewController: UIViewController {
             
             captureSession.commitConfiguration()
             
+            let queue = DispatchQueue(label: "com.lirugo.captureQueue")
+            dataOutput.setSampleBufferDelegate(self, queue: queue)
         }
-        
     }
 
+    var i:Int = 0
+    // Function to capture the frames again and again
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    
+        self.imageFromSampleBuffer(sampleBuffer: sampleBuffer)
+    }
+    
+    // Function to process the buffer
+    func imageFromSampleBuffer(sampleBuffer : CMSampleBuffer){
+        let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+//        CVPixelBufferLockBaseAddress(imageBuffer!, CVPixelBufferLockFlags.readOnly);
+        
+        
+        // Get the number of bytes per row for the pixel buffer
+        let baseAddress = CVPixelBufferGetBaseAddress(imageBuffer!);
+        
+        // Get the number of bytes per row for the pixel buffer
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer!);
+        // Get the pixel buffer width and height
+        let width = CVPixelBufferGetWidth(imageBuffer!);
+        let height = CVPixelBufferGetHeight(imageBuffer!);
+        
+        i+=1
+        print(String(width) + " x " + String(height))
+    }
+    
+    
+    
 }
 
