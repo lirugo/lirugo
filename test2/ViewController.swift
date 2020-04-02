@@ -9,18 +9,54 @@
 import UIKit
 import AVFoundation
 
+class TestUIView:UIView {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        setupView()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setupView(){
+        self.isOpaque = false
+    }
+    
+    override func draw(_ rect: CGRect) {
+        let aPath = UIBezierPath()
+        
+        aPath.move(to: CGPoint(x: 0, y:0))
+        aPath.addLine(to: CGPoint(x: 300, y: 300))
+        
+        // Keep using the method addLine until you get to the one where about to close the path
+        aPath.close()
+        
+        // If you want to stroke it with a red color
+        UIColor.green.set()
+        aPath.lineWidth = 10
+        aPath.stroke()
+    }
+}
+
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+    var testUIView: TestUIView {return self.view as! TestUIView!}
     
     let captureSession = AVCaptureSession()
     var previewLayer:CALayer!
-    
     var captureDevice:AVCaptureDevice!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         prepareCamera()
     }
+    
+//    override func loadView() {
+//        self.view = TestUIView(frame: UIScreen.main.bounds)
+//        let previewView = TestUIView(frame: self.view.frame)
+//        self.view.addSubview(previewView)
+//    }
     
     override var prefersStatusBarHidden: Bool {
         return true
@@ -42,7 +78,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         if let availableDevices = AVCaptureDevice.DiscoverySession(
             deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .front
         ).devices as [AVCaptureDevice]? {
-                captureDevice = availableDevices.first
+            captureDevice = availableDevices.first
             beginSession()
         }
     }
@@ -80,6 +116,10 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             
             let queue = DispatchQueue(label: "com.lirugo.captureQueue")
             dataOutput.setSampleBufferDelegate(self, queue: queue)
+            
+            //Show TestUIView
+            let testUIView = TestUIView(frame: UIScreen.main.bounds)
+            self.view.addSubview(testUIView)
         }
     }
 
