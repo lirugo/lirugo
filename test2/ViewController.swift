@@ -96,7 +96,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         // Get the pixel buffer width and height
         var width = CVPixelBufferGetWidth(imageBuffer!);
         var height = CVPixelBufferGetHeight(imageBuffer!);
-        
+
         let x = width/2;
         let y = height/2;
         let cvImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
@@ -110,22 +110,28 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let myPixelBuf = malloc(bufferSize);
         memmove(myPixelBuf, tempAddress, bufferSize);
         tempAddress = nil;
-        
+
         let bTypedPtr = myPixelBuf!.bindMemory(to: UInt8.self, capacity: bufferSize)
         let UInt32Buffer = UnsafeBufferPointer(start: bTypedPtr, count: bufferSize)
         let output = Array(UInt32Buffer)
-        
+
         // remember it's BGRA data
-        var rgb:Utils.RGB = Utils.RGB(r:0.0, g:0.0, b:0.0);
-        rgb.b = Float(output[(x*4)+(y*bytesPerRow)]);
-        rgb.g = Float(output[((x*4)+(y*bytesPerRow))+1]);
-        rgb.r = Float(output[((x*4)+(y*bytesPerRow))+2]);
+        var rgb:Utils.RGB = Utils.RGB(r:0, g:0, b:0);
+        rgb.b = (output[(x*4)+(y*bytesPerRow)]);
+        rgb.g = (output[((x*4)+(y*bytesPerRow))+1]);
+        rgb.r = (output[((x*4)+(y*bytesPerRow))+2]);
 //        print("R " + String(rgb.r) + " G " + String(rgb.g) + " B " + String(rgb.b));
-        
+
         var hsv:Utils.HSV = Utils.HSV(h:0.0, s:0.0, v:0.0);
         hsv = Utils.rgb2hsv(rgb: rgb);
         
-//        print("H " + String(hsv.h) + " S " + String(hsv.s) + " V " + String(hsv.v));
+        print(
+            "H " + String(round(100*hsv.h)/100) + " S " + String(round(100*hsv.s)/100) + " V " + String(round(100*hsv.v)/100) +
+            " || R " + String(rgb.r) + " G " + String(rgb.g) + " B " + String(rgb.b)
+        );
+        
+        
+        free(myPixelBuf);
         
     }
 
