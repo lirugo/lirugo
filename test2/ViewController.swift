@@ -11,6 +11,7 @@ import AVFoundation
 
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     let captureSession = AVCaptureSession()
+    var testUIView:TestUIView!
     var previewLayer:CALayer!
     var captureDevice:AVCaptureDevice!
     
@@ -79,7 +80,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             dataOutput.setSampleBufferDelegate(self, queue: queue)
             
             //Show TestUIView
-            let testUIView = TestUIView(frame: UIScreen.main.bounds)
+            testUIView = TestUIView(frame: UIScreen.main.bounds)
+
             self.view.addSubview(testUIView)
         }
     }
@@ -97,8 +99,6 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         var width = CVPixelBufferGetWidth(imageBuffer!);
         var height = CVPixelBufferGetHeight(imageBuffer!);
 
-        let x = width/2;
-        let y = height/2;
         let cvImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(cvImageBuffer!,[]);
         var tempAddress = CVPixelBufferGetBaseAddress(cvImageBuffer!);
@@ -116,23 +116,56 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let output = Array(UInt32Buffer)
 
         // remember it's BGRA data
+        
+        let xTL = 0
+        let yTL = 0
+        let detectedTL = isGreenXY(xTL, yTL, output, bytesPerRow)
+        
+        let xTR = Int(width)-Int(Double(width)/3.3)
+        let yTR = Int(height)-Int(Double(height)/1.28)
+        let detectedTR = isGreenXY(xTR, yTR, output, bytesPerRow)
+        
+        let xBR = 0
+        let yBR = 0
+        let detectedBR = isGreenXY(xBR, yBR, output, bytesPerRow)
+        
+        let xBL = 0
+        let yBL = 0
+        let detectedBL = isGreenXY(xBL, yBL, output, bytesPerRow)
+        
+        
+        free(myPixelBuf)
+        
+        DispatchQueue.main.async {
+            self.testUIView.detectedTL = detectedTL
+            self.testUIView.detectedTR = detectedTR
+            self.testUIView.detectedBR = detectedBR
+            self.testUIView.detectedBL = detectedBL
+            self.testUIView.setNeedsDisplay()
+        }
+    }
+    
+    func isGreenXY(_ x:Int,_ y:Int,_ output:Array<UInt8>,_ bytesPerRow:Int) -> Bool{
         var rgb:Utils.RGB = Utils.RGB(r:0, g:0, b:0);
         rgb.b = (output[(x*4)+(y*bytesPerRow)]);
         rgb.g = (output[((x*4)+(y*bytesPerRow))+1]);
         rgb.r = (output[((x*4)+(y*bytesPerRow))+2]);
-//        print("R " + String(rgb.r) + " G " + String(rgb.g) + " B " + String(rgb.b));
-
+        
         var hsv:Utils.HSV = Utils.HSV(h:0.0, s:0.0, v:0.0);
-        hsv = Utils.rgb2hsv(rgb: rgb);
+        hsv = Utils.rgb2hsv(rgb: rgb)
         
-        print(
-            "H " + String(round(100*hsv.h)/100) + " S " + String(round(100*hsv.s)/100) + " V " + String(round(100*hsv.v)/100) +
-            " || R " + String(rgb.r) + " G " + String(rgb.g) + " B " + String(rgb.b)
-        );
-        
-        
-        free(myPixelBuf);
-        
+        return isGreen(hsv)
+    }
+    
+    func isGreen(_ hsv: Utils.HSV) -> Bool {
+        if (
+            hsv.h > 70 && hsv.h < 160 &&
+            hsv.s >= 0.50 && hsv.v >= 0.30
+        ){
+            return true
+        }else{
+            return false
+        }
     }
 
 }

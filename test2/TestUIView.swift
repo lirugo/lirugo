@@ -11,6 +11,11 @@ import Foundation
 
 class TestUIView:UIView {
     
+    var detectedTL:Bool = false
+    var detectedTR:Bool = false
+    var detectedBR:Bool = false
+    var detectedBL:Bool = false
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -25,15 +30,15 @@ class TestUIView:UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        print(self.bounds.width)
-        print(self.bounds.height)
-        
-        let xLength = Int(self.bounds.width / 8)
-        let yLength = Int(self.bounds.height / 14)
+        let width = self.bounds.width
+        let height = self.bounds.height
+        let xLength = Int(width / 8)
+        let yLength = Int(height / 14)
         
         drawSideMarker(xLength: xLength, yLength: yLength)
         
         drawAims(xLength: xLength, yLength: yLength)
+        
     }
     
     func drawAims(xLength:Int, yLength:Int){
@@ -43,7 +48,7 @@ class TestUIView:UIView {
             y:Int(self.bounds.height)-Int(self.bounds.height/1.28),
             xLength:xLength, yLength:yLength,
             fill: false,
-            color: UIColor.red
+            color: detectedTR ? UIColor.green : UIColor.red
         )
         //Top left
         drawRect(
@@ -51,7 +56,7 @@ class TestUIView:UIView {
             y:Int(self.bounds.height)-Int(self.bounds.height/1.28),
             xLength:xLength, yLength:yLength,
             fill: false,
-            color: UIColor.red
+            color: detectedTL ? UIColor.green : UIColor.red
         )
         //Bottom right
         drawRect(
@@ -59,7 +64,7 @@ class TestUIView:UIView {
             y:Int(self.bounds.height)-Int(self.bounds.height/3.0),
             xLength:xLength, yLength:yLength,
             fill: false,
-            color: UIColor.red
+            color: detectedBR ? UIColor.green : UIColor.red
         )
         //Bottom left
         drawRect(
@@ -67,7 +72,7 @@ class TestUIView:UIView {
             y:Int(self.bounds.height)-Int(self.bounds.height/3.0),
             xLength:xLength, yLength:yLength,
             fill: false,
-            color: UIColor.red
+            color: detectedBL ? UIColor.green : UIColor.red
         )
     }
     
@@ -106,7 +111,9 @@ class TestUIView:UIView {
             height: yLength*2
         )
         rectPath = UIBezierPath(rect: rect)
+        
         UIColor.green.setFill()
+        
         rectPath.fill()
     }
     
@@ -128,5 +135,20 @@ class TestUIView:UIView {
             rectPath.lineWidth = 3
             rectPath.stroke()
         }
+    }
+    
+    func test(){
+////        drawRect(x: 100, y: 100, xLength:10, yLength:10, fill:false, color:UIColor.blue);
+//        print("sss")
+//
+//        var rect = CGRect(
+//            x: 100,
+//            y: 100,
+//            width: 100*2,
+//            height: 100*2
+//        )
+//        var rectPath = UIBezierPath(rect: rect)
+////        UIColor.green.setFill()
+//        rectPath.fill()
     }
 }
