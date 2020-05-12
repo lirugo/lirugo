@@ -63,4 +63,29 @@ class Utils {
         
         return hsv;
     }
+    
+    struct Size {
+        var width:Int
+        var height:Int
+    }
+    
+    struct Point {
+        var x:Int
+        var y:Int
+    }
+    
+    static func scalePoint(input: Size, output: Size, point: Point) -> Point {
+        var scaledPoint = Utils.Point(x:0, y:0)
+        
+        let xCoef:Double = Double(point.x)/Double(input.width)
+        let yCoef:Double = Double(point.y)/Double(input.height)
+        
+        let x = Int(Double(output.height) * Double(xCoef))
+        let y = Int(Double(output.width) * Double(yCoef))
+        
+        scaledPoint.x = y
+        scaledPoint.y = x
+        
+        return scaledPoint
+    }
 }

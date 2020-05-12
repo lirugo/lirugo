@@ -115,23 +115,41 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let UInt32Buffer = UnsafeBufferPointer(start: bTypedPtr, count: bufferSize)
         let output = Array(UInt32Buffer)
 
+        let canvasWidth = Int(testUIView.frame.size.width)
+        let canvasHeight = Int(testUIView.frame.size.height)
+        let canvasSize = Utils.Size(width: canvasWidth, height: canvasHeight)
+        let frameSize = Utils.Size(width: width, height: height)
+        var point:Utils.Point
+        var scaledPoint:Utils.Point
         // remember it's BGRA data
         
-        let xTL = 0
-        let yTL = 0
-        let detectedTL = isGreenXY(xTL, yTL, output, bytesPerRow)
+        point = Utils.Point(
+            x:Int(Double(canvasWidth)/3.3),
+            y:Int(canvasHeight)-Int(Double(canvasHeight)/1.28)
+        )
+        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+        let detectedTL = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
         
-        let xTR = Int(width)-Int(Double(width)/3.3)
-        let yTR = Int(height)-Int(Double(height)/1.28)
-        let detectedTR = isGreenXY(xTR, yTR, output, bytesPerRow)
+        point = Utils.Point(
+            x:Int(canvasWidth)-Int(Double(canvasWidth)/3.3),
+            y:Int(canvasHeight)-Int(Double(canvasHeight)/1.28)
+        )
+        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+        let detectedTR = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
         
-        let xBR = 0
-        let yBR = 0
-        let detectedBR = isGreenXY(xBR, yBR, output, bytesPerRow)
+        point = Utils.Point(
+            x:Int(canvasWidth)-Int(Double(canvasWidth)/3.3),
+            y:Int(canvasHeight)-Int(Double(canvasHeight)/3.0)
+        )
+        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+        let detectedBR = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
         
-        let xBL = 0
-        let yBL = 0
-        let detectedBL = isGreenXY(xBL, yBL, output, bytesPerRow)
+        point = Utils.Point(
+            x:Int(Double(canvasWidth)/3.3),
+            y:Int(canvasHeight)-Int(Double(canvasHeight)/3.0)
+        )
+        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+        let detectedBL = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
         
         
         free(myPixelBuf)
