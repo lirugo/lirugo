@@ -18,6 +18,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     override func viewDidLoad() {
         super.viewDidLoad()
         prepareCamera()
+        
+        Utils.doGet()
     }
     
     override var prefersStatusBarHidden: Bool {
@@ -154,11 +156,13 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         free(myPixelBuf)
         
+        
         DispatchQueue.main.async {
             self.testUIView.detectedTL = detectedTL
             self.testUIView.detectedTR = detectedTR
             self.testUIView.detectedBR = detectedBR
             self.testUIView.detectedBL = detectedBL
+            
             self.testUIView.setNeedsDisplay()
         }
     }

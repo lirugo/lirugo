@@ -15,6 +15,9 @@ class TestUIView:UIView {
     var detectedTR:Bool = false
     var detectedBR:Bool = false
     var detectedBL:Bool = false
+    var screenFilled:Bool = false
+    var width:CGFloat = 0
+    var height:CGFloat = 0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -30,14 +33,16 @@ class TestUIView:UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        let width = self.bounds.width
-        let height = self.bounds.height
+        width = self.bounds.width
+        height = self.bounds.height
         let xLength = Int(width / 8)
         let yLength = Int(height / 14)
         
         drawSideMarker(xLength: xLength, yLength: yLength)
         
         drawAims(xLength: xLength, yLength: yLength)
+        
+        fillScreen()
         
     }
     
@@ -137,18 +142,22 @@ class TestUIView:UIView {
         }
     }
     
-    func test(){
-////        drawRect(x: 100, y: 100, xLength:10, yLength:10, fill:false, color:UIColor.blue);
-//        print("sss")
-//
-//        var rect = CGRect(
-//            x: 100,
-//            y: 100,
-//            width: 100*2,
-//            height: 100*2
-//        )
-//        var rectPath = UIBezierPath(rect: rect)
-////        UIColor.green.setFill()
-//        rectPath.fill()
+    func fillScreen(){
+        var count:Int = 0
+        if detectedTL { count += 1 }
+        if detectedTR { count += 1 }
+        if detectedBR { count += 1 }
+        if detectedBL { count += 1 }
+        
+        if count >= 3 || screenFilled {
+            screenFilled = true
+            drawRect(
+                x:0,
+                y:0,
+                xLength:Int(width), yLength:Int(height),
+                fill: true,
+                color: UIColor.white
+            )
+        }
     }
 }
