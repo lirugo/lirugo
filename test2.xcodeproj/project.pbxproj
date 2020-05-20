@@ -14,6 +14,7 @@
 		CE0B25302431F6D30056F0CC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CE0B252E2431F6D30056F0CC /* LaunchScreen.storyboard */; };
 		CE0B253B2431F6D30056F0CC /* test2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0B253A2431F6D30056F0CC /* test2Tests.swift */; };
 		CE0B25462431F6D40056F0CC /* test2UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0B25452431F6D40056F0CC /* test2UITests.swift */; };
+		CEB1C4FA246AECBA0074FDA3 /* NetUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB1C4F8246AECBA0074FDA3 /* NetUtils.cpp */; };
 		CEC6143424582EDA0023AB3D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC6143324582EDA0023AB3D /* Utils.swift */; };
 		CEC61438245836E40023AB3D /* TestUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC61437245836E40023AB3D /* TestUIView.swift */; };
 /* End PBXBuildFile section */
@@ -49,6 +50,9 @@
 		CE0B25412431F6D40056F0CC /* test2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = test2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE0B25452431F6D40056F0CC /* test2UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = test2UITests.swift; sourceTree = "<group>"; };
 		CE0B25472431F6D40056F0CC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CEB1C4F7246AECBA0074FDA3 /* test2-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "test2-Bridging-Header.h"; sourceTree = "<group>"; };
+		CEB1C4F8246AECBA0074FDA3 /* NetUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NetUtils.cpp; sourceTree = "<group>"; };
+		CEB1C4F9246AECBA0074FDA3 /* NetUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NetUtils.hpp; sourceTree = "<group>"; };
 		CEC6143324582EDA0023AB3D /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		CEC61437245836E40023AB3D /* TestUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUIView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -109,6 +113,9 @@
 				CE0B25312431F6D30056F0CC /* Info.plist */,
 				CEC6143324582EDA0023AB3D /* Utils.swift */,
 				CEC61437245836E40023AB3D /* TestUIView.swift */,
+				CEB1C4F8246AECBA0074FDA3 /* NetUtils.cpp */,
+				CEB1C4F9246AECBA0074FDA3 /* NetUtils.hpp */,
+				CEB1C4F7246AECBA0074FDA3 /* test2-Bridging-Header.h */,
 			);
 			path = test2;
 			sourceTree = "<group>";
@@ -199,6 +206,7 @@
 				TargetAttributes = {
 					CE0B25212431F6CF0056F0CC = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1010;
 					};
 					CE0B25352431F6D30056F0CC = {
 						CreatedOnToolsVersion = 10.1;
@@ -265,6 +273,7 @@
 				CEC61438245836E40023AB3D /* TestUIView.swift in Sources */,
 				CE0B25282431F6CF0056F0CC /* ViewController.swift in Sources */,
 				CE0B25262431F6CF0056F0CC /* AppDelegate.swift in Sources */,
+				CEB1C4FA246AECBA0074FDA3 /* NetUtils.cpp in Sources */,
 				CEC6143424582EDA0023AB3D /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -441,6 +450,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2D339RRS85;
 				INFOPLIST_FILE = test2/Info.plist;
@@ -450,6 +460,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lirugo.test2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "test2/test2-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -460,6 +472,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2D339RRS85;
 				INFOPLIST_FILE = test2/Info.plist;
@@ -469,6 +482,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lirugo.test2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "test2/test2-Bridging-Header.h";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

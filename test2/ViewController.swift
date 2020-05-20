@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import Foundation
 
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     let captureSession = AVCaptureSession()
@@ -19,7 +20,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         super.viewDidLoad()
         prepareCamera()
         
-        Utils.doGet()
+        let response = serverIsAvailable();
+        
+        print(response)
     }
     
     override var prefersStatusBarHidden: Bool {
