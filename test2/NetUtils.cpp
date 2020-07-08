@@ -39,15 +39,20 @@ bool serverIsAvailable(){
         tcp::socket socket(io_service);
         boost::asio::connect(socket, endpoint_iterator);
         
+        //Body
+        string json = "{\"text\": \"Some msg from post\"}";
+        
         // Form the request. We specify the "Connection: close" header so that the
         // server will close the socket after transmitting the response. This will
         // allow us to treat all data up until the EOF as the content.
         boost::asio::streambuf request;
         std::ostream request_stream(&request);
-        request_stream << "GET " << url << " HTTP/1.0\r\n";
+        request_stream << "POST " << url << " HTTP/1.0\r\n";
         request_stream << "Host: " << host << "\r\n";
         request_stream << "Accept: */*\r\n";
+        request_stream << "Content-Length: " << json.length() << "\r\n";
         request_stream << "Connection: close\r\n\r\n";
+        request_stream << json;
         
         // Send the request.
         boost::asio::write(socket, request);
