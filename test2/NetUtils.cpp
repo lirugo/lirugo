@@ -6,21 +6,13 @@
 //  Copyright © 2020 user. All rights reserved.
 //
 #include <iostream>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio.hpp>
 #include <cstdlib>
 #include <string>
 
 #include "NetUtils.hpp"
 
-namespace beast = boost::beast;     // from <boost/beast.hpp>
-namespace http = beast::http;       // from <boost/beast/http.hpp>
-namespace net = boost::asio;        // from <boost/asio.hpp>
-using tcp = net::ip::tcp;           // from <boost/asio/ip/tcp.hpp>
+using boost::asio::ip::tcp;
 
 using namespace std;
 
@@ -34,58 +26,82 @@ bool serverIsAvailable(){
     {
         // Check command line arguments.
         auto const host = "192.168.0.107";
-        auto const port = "8080";
-        auto const target = "/api/defect/22";
-        int version = 10;
+        auto const url = "/api/ios/defect";
         
-        // The io_context is required for all I/O
-        net::io_context ioc;
+        boost::asio::io_service io_service;
         
-        // These objects perform our I/O
-        tcp::resolver resolver(ioc);
-        beast::tcp_stream stream(ioc);
+        // Get a list of endpoints corresponding to the server name.
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query(host, "http");
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
         
-        // Look up the domain name
-        auto const results = resolver.resolve(host, port);
+        // Try each endpoint until we successfully establish a connection.
+        tcp::socket socket(io_service);
+        boost::asio::connect(socket, endpoint_iterator);
         
-        // Make the connection on the IP address we get from a lookup
-        stream.connect(results);
+        // Form the request. We specify the "Connection: close" header so that the
+        // server will close the socket after transmitting the response. This will
+        // allow us to treat all data up until the EOF as the content.
+        boost::asio::streambuf request;
+        std::ostream request_stream(&request);
+        request_stream << "GET " << url << " HTTP/1.0\r\n";
+        request_stream << "Host: " << host << "\r\n";
+        request_stream << "Accept: */*\r\n";
+        request_stream << "Connection: close\r\n\r\n";
         
-        // Set up an HTTP GET request message
-        http::request<http::string_body> req{http::verb::get, target, version};
-        req.set(http::field::host, host);
-        req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+        // Send the request.
+        boost::asio::write(socket, request);
         
-        // Send the HTTP request to the remote host
-        http::write(stream, req);
+        // Read the response status line. The response streambuf will automatically
+        // grow to accommodate the entire line. The growth may be limited by passing
+        // a maximum size to the streambuf constructor.
+        boost::asio::streambuf response;
+        boost::asio::read_until(socket, response, "\r\n");
         
-        // This buffer is used for reading and must be persisted
-        beast::flat_buffer buffer;
+        // Check that response is OK.
+        std::istream response_stream(&response);
+        std::string http_version;
+        response_stream >> http_version;
+        unsigned int status_code;
+        response_stream >> status_code;
+        std::string status_message;
+        std::getline(response_stream, status_message);
+        if (!response_stream || http_version.substr(0, 5) != "HTTP/")
+        {
+            std::cout << "Invalid response\n";
+            return 1;
+        }
+        if (status_code != 200)
+        {
+            std::cout << "Response returned with status code " << status_code << "\n";
+            return 1;
+        }
         
-        // Declare a container to hold the response
-        http::response<http::string_body> res;
+        // Read the response headers, which are terminated by a blank line.
+        boost::asio::read_until(socket, response, "\r\n\r\n");
         
-        // Receive the HTTP response
-        http::read(stream, buffer, res);
+        // Process the response headers.
+        std::string header;
+        while (std::getline(response_stream, header) && header != "\r")
+            std::cout << header << "\n";
+        std::cout << "\n";
         
-        // Write the message to standard out
-        std::cout << res.body().data() << std::endl;
+        // Write whatever content we already have to output.
+        if (response.size() > 0)
+            std::cout << &response;
         
-        // Gracefully close the socket
-        beast::error_code ec;
-        stream.socket().shutdown(tcp::socket::shutdown_both, ec);
-        
-        // not_connected happens sometimes
-        // so don't bother reporting it.
-        //
-        if(ec && ec != beast::errc::not_connected)
-            throw beast::system_error{ec};
-        
-        // If we get here then the connection is closed gracefully
+        // Read until EOF, writing data to output as we go.
+        boost::system::error_code error;
+        while (boost::asio::read(socket, response,
+                                 boost::asio::transfer_at_least(1), error))
+            std::cout << &response;
+        if (error != boost::asio::error::eof)
+            throw boost::system::system_error(error);
     }
-    catch(std::exception const& e)
+    catch (std::exception& e)
     {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cout << "Exception: " << e.what() << "\n";
     }
+    
     return false;
 }
