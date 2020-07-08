@@ -453,6 +453,12 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2D339RRS85;
+				HEADER_SEARCH_PATHS = (
+					"<Multiple",
+					"values>",
+					/usr/local/boost_1_73_0/include/,
+					/usr/local/boost_1_73_0/lib/,
+				);
 				INFOPLIST_FILE = test2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -475,6 +481,12 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2D339RRS85;
+				HEADER_SEARCH_PATHS = (
+					"<Multiple",
+					"values>",
+					/usr/local/boost_1_73_0/include/,
+					/usr/local/boost_1_73_0/lib/,
+				);
 				INFOPLIST_FILE = test2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
