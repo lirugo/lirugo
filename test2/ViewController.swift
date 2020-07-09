@@ -20,7 +20,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         super.viewDidLoad()
         prepareCamera()
         
-//        let response = sendRequest2Server(frame)
+        //        let response = sendRequest2Server(frame)
     }
     
     override var prefersStatusBarHidden: Bool {
@@ -84,7 +84,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             
             //Show TestUIView
             testUIView = TestUIView(frame: UIScreen.main.bounds)
-
+            
             self.view.addSubview(testUIView)
         }
     }
@@ -94,16 +94,22 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         self.imageFromSampleBuffer(sampleBuffer: sampleBuffer)
     }
     
-    var testBool = false
+    let MODE_SEARCH_SCREEN = "MODE_SEARCH_SCREEN"
+    let MODE_FILL_SCREEN = "MODE_FILL_SCREEN"
+    let MODE_TAKE_PHOTO = "MODE_TAKE_PHOTO"
+    let MODE_UNHANDLED = "MODE_UNHANDLED"
+    var CORE_MODE = "MODE_SEARCH_SCREEN"
+    var frameSkipped:Int = 0
+    
     // Function to process the buffer
     func imageFromSampleBuffer(sampleBuffer : CMSampleBuffer){
         let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-    
+        
         // Get the pixel buffer width and height
         var width = CVPixelBufferGetWidth(imageBuffer!);
         var height = CVPixelBufferGetHeight(imageBuffer!);
         var bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer!);
-
+        
         let cvImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(cvImageBuffer!,[]);
         var tempAddress = CVPixelBufferGetBaseAddress(cvImageBuffer!);
@@ -114,11 +120,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let myPixelBuf = malloc(bufferSize);
         memmove(myPixelBuf, tempAddress, bufferSize);
         tempAddress = nil;
-
+        
         let bTypedPtr = myPixelBuf!.bindMemory(to: UInt8.self, capacity: bufferSize)
         let UInt32Buffer = UnsafeBufferPointer(start: bTypedPtr, count: bufferSize)
         let output = Array(UInt32Buffer)
-
+        
         let canvasWidth = Int(testUIView.frame.size.width)
         let canvasHeight = Int(testUIView.frame.size.height)
         let canvasSize = Utils.Size(width: canvasWidth, height: canvasHeight)
@@ -162,10 +168,38 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         if detectedBR { detectedAngle+=1; }
         if detectedBL { detectedAngle+=1; }
         
-        if detectedAngle >= 3 {
-            testBool = true
-            print("DETECTED");
-            var frame =
+        if CORE_MODE == MODE_SEARCH_SCREEN {
+            DispatchQueue.main.async {
+                self.testUIView.detectedTL = detectedTL
+                self.testUIView.detectedTR = detectedTR
+                self.testUIView.detectedBR = detectedBR
+                self.testUIView.detectedBL = detectedBL
+                
+                self.testUIView.setNeedsDisplay()
+            }
+            
+            if detectedAngle >= 3 {
+                CORE_MODE = MODE_FILL_SCREEN
+                print("DETECTED");
+            }
+        }
+        
+        if CORE_MODE == MODE_FILL_SCREEN {
+            print("MODE_FILL_SCREEN");
+            frameSkipped += 1
+            
+            if frameSkipped > 5 {
+                print("MODE_TAKE_PHOTO");
+                CORE_MODE = MODE_TAKE_PHOTO
+            }
+        }
+        
+        
+        if CORE_MODE == MODE_TAKE_PHOTO {
+            print("MODE_UNHANDLED");
+            CORE_MODE = MODE_UNHANDLED
+            
+            let frame =
                 "{" +
                     "\"model\":\"IPhone\"," +
                     "\"frameType\":\"BGRA\"," +
@@ -173,22 +207,14 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                     "\"height\":" + String(height) + "," +
                     "\"bytesPerRow\":" + String(bytesPerRow) + "," +
                     "\"frame\":" +
-                        output.description +
+                    output.description +
                     
-                "}";
+            "}";
             sendRequest2Server(frame);
         }
         
         free(myPixelBuf)
         
-        DispatchQueue.main.async {
-            self.testUIView.detectedTL = detectedTL
-            self.testUIView.detectedTR = detectedTR
-            self.testUIView.detectedBR = detectedBR
-            self.testUIView.detectedBL = detectedBL
-            
-            self.testUIView.setNeedsDisplay()
-        }
     }
     
     func isGreenXY(_ x:Int,_ y:Int,_ output:Array<UInt8>,_ bytesPerRow:Int) -> Bool{
@@ -206,12 +232,12 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     func isGreen(_ hsv: Utils.HSV) -> Bool {
         if (
             hsv.h > 70 && hsv.h < 160 &&
-            hsv.s >= 0.50 && hsv.v >= 0.30
-        ){
+                hsv.s >= 0.50 && hsv.v >= 0.30
+            ){
             return true
         }else{
             return false
         }
     }
-
+    
 }
