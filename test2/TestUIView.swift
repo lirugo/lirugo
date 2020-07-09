@@ -18,6 +18,7 @@ class TestUIView:UIView {
     var screenFilled:Bool = false
     var width:CGFloat = 0
     var height:CGFloat = 0
+    var requestStatus:String? = nil
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -44,6 +45,35 @@ class TestUIView:UIView {
         
         fillScreen()
         
+        
+        displayStatus()
+    }
+    
+    func displayStatus(){
+        if  self.requestStatus != nil {
+            width = self.bounds.width
+            height = self.bounds.height
+            
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = .center
+            
+            let attributes = [
+                NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 32.0),
+                NSAttributedString.Key.foregroundColor: UIColor.red
+            ]
+            
+            let attributedString = NSAttributedString(string: self.requestStatus!, attributes: attributes)
+            let stringSize = self.requestStatus!.size(withAttributes: attributes)
+            
+            let stringRect = CGRect(
+                x: width/2-stringSize.width/2,
+                y: height/2-stringSize.height/2,
+                width: stringSize.width,
+                height: stringSize.height
+            )
+            attributedString.draw(in: stringRect)
+        }
     }
     
     func drawAims(xLength:Int, yLength:Int){

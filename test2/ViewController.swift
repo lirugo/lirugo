@@ -211,6 +211,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                     
             "}";
             sendRequest2Server(frame);
+            
+            DispatchQueue.main.async {
+                self.testUIView.requestStatus = "REPEAT"
+                self.testUIView.setNeedsDisplay()
+            }
         }
         
         free(myPixelBuf)
