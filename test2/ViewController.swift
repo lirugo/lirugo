@@ -20,9 +20,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         super.viewDidLoad()
         prepareCamera()
         
-        let response = serverIsAvailable();
-        
-        print(response)
+//        let response = sendRequest2Server(frame)
     }
     
     override var prefersStatusBarHidden: Bool {
@@ -157,8 +155,25 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let detectedBL = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
         
         
-        free(myPixelBuf)
+        var detectedAngle:Int = 0
+        if detectedTL { detectedAngle+=1; }
+        if detectedTR { detectedAngle+=1; }
+        if detectedBR { detectedAngle+=1; }
+        if detectedBL { detectedAngle+=1; }
         
+        if detectedAngle >= 3 {
+            print("DETECTED");
+            var frame =
+                "{" +
+                    "\"model\":\"IPhone\"," +
+                    "\"frameType\":\"BGR\"," +
+                    "\"width\":" + String(width) + "," +
+                    "\"height\":" + String(height) + "" +
+                "}";
+            sendRequest2Server(frame);
+        }
+        
+        free(myPixelBuf)
         
         DispatchQueue.main.async {
             self.testUIView.detectedTL = detectedTL

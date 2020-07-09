@@ -12,16 +12,15 @@
 
 #include "NetUtils.hpp"
 
-using boost::asio::ip::tcp;
-
 using namespace std;
+using boost::asio::ip::tcp;
 
 #define HOST "google.com"
 #define PORT 80
 
 const string SERVER_DOMAIN = "google.com";
 
-bool serverIsAvailable(){
+bool sendRequest2Server(const char *data){
     try
     {
         // Check command line arguments.
@@ -40,7 +39,7 @@ bool serverIsAvailable(){
         boost::asio::connect(socket, endpoint_iterator);
         
         //Body
-        string json = "{\"text\": \"Some msg from post\"}";
+        string json = string(data);
         
         // Form the request. We specify the "Connection: close" header so that the
         // server will close the socket after transmitting the response. This will
