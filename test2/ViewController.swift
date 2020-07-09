@@ -94,6 +94,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         self.imageFromSampleBuffer(sampleBuffer: sampleBuffer)
     }
     
+    var testBool = false
     // Function to process the buffer
     func imageFromSampleBuffer(sampleBuffer : CMSampleBuffer){
         let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
@@ -101,11 +102,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         // Get the pixel buffer width and height
         var width = CVPixelBufferGetWidth(imageBuffer!);
         var height = CVPixelBufferGetHeight(imageBuffer!);
+        var bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer!);
 
         let cvImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CVPixelBufferLockBaseAddress(cvImageBuffer!,[]);
         var tempAddress = CVPixelBufferGetBaseAddress(cvImageBuffer!);
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(cvImageBuffer!);
         width = CVPixelBufferGetWidth(cvImageBuffer!);
         height = CVPixelBufferGetHeight(cvImageBuffer!);
         CVPixelBufferUnlockBaseAddress(cvImageBuffer!,[]);
@@ -162,13 +163,18 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         if detectedBL { detectedAngle+=1; }
         
         if detectedAngle >= 3 {
+            testBool = true
             print("DETECTED");
             var frame =
                 "{" +
                     "\"model\":\"IPhone\"," +
-                    "\"frameType\":\"BGR\"," +
+                    "\"frameType\":\"BGRA\"," +
                     "\"width\":" + String(width) + "," +
-                    "\"height\":" + String(height) + "" +
+                    "\"height\":" + String(height) + "," +
+                    "\"bytesPerRow\":" + String(bytesPerRow) + "," +
+                    "\"frame\":" +
+                        output.description +
+                    
                 "}";
             sendRequest2Server(frame);
         }
