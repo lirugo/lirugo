@@ -15,12 +15,29 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     var testUIView:TestUIView!
     var previewLayer:CALayer!
     var captureDevice:AVCaptureDevice!
+    var activityIndicator:UIActivityIndicatorView = UIActivityIndicatorView()
+    
+    func showActivityIndicator(){
+        activityIndicator.center = self.view.center
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.style = UIActivityIndicatorView.Style.gray
+        activityIndicator.transform = CGAffineTransform.init(scaleX: 5, y: 5);
+        activityIndicator.startAnimating()
+        
+        view.addSubview(activityIndicator)
+        
+        UIApplication.shared.beginIgnoringInteractionEvents()
+    }
+    
+    func hideActivityIndicator(){
+        activityIndicator.stopAnimating()
+        UIApplication.shared.endIgnoringInteractionEvents()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         prepareCamera()
-        
-        //        let response = sendRequest2Server(frame)
+//        let response = sendRequest2Server(frame)
     }
     
     override var prefersStatusBarHidden: Bool {
@@ -94,15 +111,18 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         self.imageFromSampleBuffer(sampleBuffer: sampleBuffer)
     }
     
+    var CORE_MODE = "MODE_SEARCH_SCREEN"
     let MODE_SEARCH_SCREEN = "MODE_SEARCH_SCREEN"
     let MODE_FILL_SCREEN = "MODE_FILL_SCREEN"
     let MODE_TAKE_PHOTO = "MODE_TAKE_PHOTO"
+    let MODE_SEND_TO_SERVER = "MODE_SEND_TO_SERVER"
     let MODE_UNHANDLED = "MODE_UNHANDLED"
-    var CORE_MODE = "MODE_SEARCH_SCREEN"
     var frameSkipped:Int = 0
+    var frameJson:String = ""
     
     // Function to process the buffer
     func imageFromSampleBuffer(sampleBuffer : CMSampleBuffer){
+            
         let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
         
         // Get the pixel buffer width and height
@@ -125,50 +145,50 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         let UInt32Buffer = UnsafeBufferPointer(start: bTypedPtr, count: bufferSize)
         let output = Array(UInt32Buffer)
         
-        let canvasWidth = Int(testUIView.frame.size.width)
-        let canvasHeight = Int(testUIView.frame.size.height)
-        let canvasSize = Utils.Size(width: canvasWidth, height: canvasHeight)
-        let frameSize = Utils.Size(width: width, height: height)
-        var point:Utils.Point
-        var scaledPoint:Utils.Point
-        // remember it's BGRA data
-        
-        point = Utils.Point(
-            x:Int(Double(canvasWidth)/3.3),
-            y:Int(canvasHeight)-Int(Double(canvasHeight)/1.28)
-        )
-        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
-        let detectedTL = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
-        
-        point = Utils.Point(
-            x:Int(canvasWidth)-Int(Double(canvasWidth)/3.3),
-            y:Int(canvasHeight)-Int(Double(canvasHeight)/1.28)
-        )
-        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
-        let detectedTR = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
-        
-        point = Utils.Point(
-            x:Int(canvasWidth)-Int(Double(canvasWidth)/3.3),
-            y:Int(canvasHeight)-Int(Double(canvasHeight)/3.0)
-        )
-        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
-        let detectedBR = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
-        
-        point = Utils.Point(
-            x:Int(Double(canvasWidth)/3.3),
-            y:Int(canvasHeight)-Int(Double(canvasHeight)/3.0)
-        )
-        scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
-        let detectedBL = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
-        
-        
-        var detectedAngle:Int = 0
-        if detectedTL { detectedAngle+=1; }
-        if detectedTR { detectedAngle+=1; }
-        if detectedBR { detectedAngle+=1; }
-        if detectedBL { detectedAngle+=1; }
-        
         if CORE_MODE == MODE_SEARCH_SCREEN {
+            let canvasWidth = Int(testUIView.frame.size.width)
+            let canvasHeight = Int(testUIView.frame.size.height)
+            let canvasSize = Utils.Size(width: canvasWidth, height: canvasHeight)
+            let frameSize = Utils.Size(width: width, height: height)
+            var point:Utils.Point
+            var scaledPoint:Utils.Point
+            // remember it's BGRA data
+            
+            point = Utils.Point(
+                x:Int(Double(canvasWidth)/3.3),
+                y:Int(canvasHeight)-Int(Double(canvasHeight)/1.28)
+            )
+            scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+            let detectedTL = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
+            
+            point = Utils.Point(
+                x:Int(canvasWidth)-Int(Double(canvasWidth)/3.3),
+                y:Int(canvasHeight)-Int(Double(canvasHeight)/1.28)
+            )
+            scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+            let detectedTR = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
+            
+            point = Utils.Point(
+                x:Int(canvasWidth)-Int(Double(canvasWidth)/3.3),
+                y:Int(canvasHeight)-Int(Double(canvasHeight)/3.0)
+            )
+            scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+            let detectedBR = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
+            
+            point = Utils.Point(
+                x:Int(Double(canvasWidth)/3.3),
+                y:Int(canvasHeight)-Int(Double(canvasHeight)/3.0)
+            )
+            scaledPoint = Utils.scalePoint(input: canvasSize, output: frameSize, point: point)
+            let detectedBL = isGreenXY(scaledPoint.x, scaledPoint.y, output, bytesPerRow)
+            
+            
+            var detectedAngle:Int = 0
+            if detectedTL { detectedAngle+=1; }
+            if detectedTR { detectedAngle+=1; }
+            if detectedBR { detectedAngle+=1; }
+            if detectedBL { detectedAngle+=1; }
+            
             DispatchQueue.main.async {
                 self.testUIView.detectedTL = detectedTL
                 self.testUIView.detectedTR = detectedTR
@@ -177,7 +197,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                 
                 self.testUIView.setNeedsDisplay()
             }
-            
+        
             if detectedAngle >= 3 {
                 CORE_MODE = MODE_FILL_SCREEN
                 print("DETECTED");
@@ -196,21 +216,26 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         
         if CORE_MODE == MODE_TAKE_PHOTO {
-            print("MODE_UNHANDLED");
-            CORE_MODE = MODE_UNHANDLED
+            print("MODE_SEND_TO_SERVER");
+            CORE_MODE = MODE_SEND_TO_SERVER
             
-            let frame =
+            frameJson =
                 "{" +
                     "\"model\":\"IPhone\"," +
-                    "\"frameType\":\"BGRA\"," +
                     "\"width\":" + String(width) + "," +
                     "\"height\":" + String(height) + "," +
                     "\"bytesPerRow\":" + String(bytesPerRow) + "," +
-                    "\"frame\":" +
-                    output.description +
-                    
+                    "\"frameType\":\"BGRA\"," +
+                    "\"frame\":" + output.description +
             "}";
-            sendRequest2Server(frame);
+            
+            showActivityIndicator()
+        }
+        
+        if CORE_MODE == MODE_SEND_TO_SERVER {
+            print("MODE_UNHANDLED");
+            CORE_MODE = MODE_UNHANDLED
+            sendRequest2Server(frameJson);
             
             DispatchQueue.main.async {
                 self.testUIView.requestStatus = "REPEAT"
@@ -218,8 +243,11 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             }
         }
         
-        free(myPixelBuf)
+        if CORE_MODE == MODE_UNHANDLED {
+            hideActivityIndicator()
+        }
         
+        free(myPixelBuf)
     }
     
     func isGreenXY(_ x:Int,_ y:Int,_ output:Array<UInt8>,_ bytesPerRow:Int) -> Bool{
