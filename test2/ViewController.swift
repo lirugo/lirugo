@@ -234,17 +234,28 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         if CORE_MODE == MODE_SEND_TO_SERVER {
             print("MODE_UNHANDLED");
-            CORE_MODE = MODE_UNHANDLED
-            sendRequest2Server(frameJson);
+            CORE_MODE = MODE_UNHANDLED;
+            let requestStatus = sendRequest2Server(frameJson);
+            let status:String
+            
+            if requestStatus == 1 {
+                status = "SOLID"
+            } else if requestStatus == 2 {
+                status = "BROKEN"
+            } else if requestStatus == -1 {
+                status = "REPEAT"
+            } else {
+                status = "ERROR"
+            }
             
             DispatchQueue.main.async {
-                self.testUIView.requestStatus = "REPEAT"
+                self.testUIView.requestStatus = status
                 self.testUIView.setNeedsDisplay()
             }
         }
         
         if CORE_MODE == MODE_UNHANDLED {
-            hideActivityIndicator()
+//            hideActivityIndicator()
         }
         
         free(myPixelBuf)

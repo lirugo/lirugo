@@ -9,7 +9,8 @@
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <string>
-
+#include <iostream>
+#include <iomanip>
 #include "NetUtils.hpp"
 
 using namespace std;
@@ -20,7 +21,7 @@ using boost::asio::ip::tcp;
 
 const string SERVER_DOMAIN = "google.com";
 
-bool sendRequest2Server(const char *data){
+int sendRequest2Server(const char *data){
     try
     {
         // Check command line arguments.
@@ -64,48 +65,46 @@ bool sendRequest2Server(const char *data){
         
         // Check that response is OK.
         std::istream response_stream(&response);
+        
         std::string http_version;
         response_stream >> http_version;
         unsigned int status_code;
         response_stream >> status_code;
         std::string status_message;
         std::getline(response_stream, status_message);
+        
         if (!response_stream || http_version.substr(0, 5) != "HTTP/")
         {
             std::cout << "Invalid response\n";
-            return 1;
+            return -1;
         }
         if (status_code != 200)
         {
             std::cout << "Response returned with status code " << status_code << "\n";
-            return 1;
+            return -1;
+        }
+
+        if (response.size() > 0){
+            // parsing the headers and get body of response
+            string line;
+            while (getline(response_stream, line, '\n')) {
+                if (line.empty() || line == "\r")
+                    break;
+                
+                if (line.back() == '\r')
+                    line.resize(line.size()-1);
+            }
         }
         
-        // Read the response headers, which are terminated by a blank line.
-        boost::asio::read_until(socket, response, "\r\n\r\n");
+        string const body(std::istreambuf_iterator<char>{response_stream}, {});
         
-        // Process the response headers.
-        std::string header;
-        while (std::getline(response_stream, header) && header != "\r")
-            std::cout << header << "\n";
-        std::cout << "\n";
+        return std::stoi(body);
         
-        // Write whatever content we already have to output.
-        if (response.size() > 0)
-            std::cout << &response;
-        
-        // Read until EOF, writing data to output as we go.
-        boost::system::error_code error;
-        while (boost::asio::read(socket, response,
-                                 boost::asio::transfer_at_least(1), error))
-            std::cout << &response;
-        if (error != boost::asio::error::eof)
-            throw boost::system::system_error(error);
     }
     catch (std::exception& e)
     {
         std::cout << "Exception: " << e.what() << "\n";
     }
     
-    return false;
+    return -1;
 }

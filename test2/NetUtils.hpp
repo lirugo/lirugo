@@ -4,7 +4,7 @@
 extern "C" {
 #endif
     
-    bool sendRequest2Server(const char *data);
+    int sendRequest2Server(const char *data);
     
 #ifdef __cplusplus
 }
