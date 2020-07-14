@@ -229,7 +229,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                     "\"frame\":" + output.description +
             "}";
             
-            showActivityIndicator()
+            DispatchQueue.main.async {
+                self.showActivityIndicator()
+            }
         }
         
         if CORE_MODE == MODE_SEND_TO_SERVER {
@@ -237,7 +239,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             CORE_MODE = MODE_UNHANDLED;
             let requestStatus = sendRequest2Server(frameJson);
             let status:String
-            
+
             if requestStatus == 1 {
                 status = "SOLID"
             } else if requestStatus == 2 {
@@ -247,15 +249,16 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             } else {
                 status = "ERROR"
             }
-            
+
             DispatchQueue.main.async {
                 self.testUIView.requestStatus = status
+                self.hideActivityIndicator()
                 self.testUIView.setNeedsDisplay()
             }
         }
         
         if CORE_MODE == MODE_UNHANDLED {
-//            hideActivityIndicator()
+            
         }
         
         free(myPixelBuf)
