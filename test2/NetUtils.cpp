@@ -25,7 +25,7 @@ int sendRequest2Server(const char *data){
     try
     {
         // Check command line arguments.
-        auto const host = "192.168.0.107";
+        auto const host = "sc.smartalliance.eu";
         auto const url = "/api/ios/defect";
         
         boost::asio::io_service io_service;
